@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const heart = document.getElementsByTagName("img");
     const letters = document.getElementsByClassName('letter');
     const keypad = document.querySelectorAll('button');
-    console.log(letters);
+
 
     let missed = 0; //if player guesses wrong five times, they lose
     //starts the game by removing the overlay
@@ -58,17 +58,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const phraseArray = getRandomPhraseAsArray(phrases);
     addPhraseToDisplay(phraseArray);
-    function checkLetter(button) {
-        const words = letters.length - 1;
-        for (let i = 0; i < words; i++) {
 
-            if (letters[i].textContent === button && letters[i].classList !== "show") {
+    function checkLetter(button) {
+        let contains = 0;
+        const words = letters.length;
+        console.log(contains);
+        // if (letters.indexOf(button) > -1) {
+        //     contains++;
+        //     console.log('worked');
+        // }
+        // for (i = 0; i < phraseArray.length; i++) {
+        //     console.log('started');
+        //     if (phraseArray[i].indexOf(button) > -1) {
+        //         contains++;
+        //         console.log('worked');
+        //     }
+        //     else if (phraseArray[i].indexOf(button) === -1) {
+        //         console.log('error');
+        //     }
+        // }
+
+        for (let i = 0; i < words; i++) {
+            if (letters[i].textContent === button) {
+                console.log(letters[i].textContent);
                 letters[i].classList.add('show');
+                contains++;
                 //console.log(letters[i].indexOf(button));
+                //find letters that match the button pressed and then add show
+                //why does i work in time machine but not e?
             }
         }
-        return null;
+        if (contains === 0) {
+            return null;
+        }
+
     }
+    qwerty.addEventListener('click', (e) => {//listen to qwerty
+        if (e.target.tagName === "BUTTON") {
+            console.log(e.target.textContent);
+            let button = e.target;
+            for (let i = 0; i < keypad.length; i++) {
+
+                if (button.textContent === keypad[i].textContent && keypad[i].disabled === false) {
+                    keypad[i].classList.add('chosen');
+                    keypad[i].disabled = true;
+                    break;
+                }
+            }
+            let letterFound = checkLetter(button.textContent);
+            console.log(letterFound);
+            if (letterFound === null && missed !== 5) {
+                heart[missed].src = "images/lostHeart.png";
+                missed += 1;
+                console.log(missed);
+            }
+        }
+        checkWin();
+    })
     window.addEventListener('keypress', (e) => {
 
         for (let i = 0; i < keypad.length; i++) {
@@ -79,29 +125,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             }
         }
-        checkLetter(e.key);
-        let letterFound = checkLetter();
-        if (letterFound === null && missed !== 5) {
+        let letterFound = checkLetter(e.key);
+        console.log(letterFound);
+        if (letterFound === null && missed !== 5) {//and if the keypad is disabled.
             heart[missed].src = "images/lostHeart.png";
             missed += 1;
             console.log(missed);
         }
         //missed = missed + 1;
-    })
+        checkWin();
+    });
 
-    const show = document.getElementsByClassName('show');
+
     function checkWin() {
+        const show = document.getElementsByClassName('show');
+        console.log(show.length);
+        console.log(letters.length);
         if (show.length === letters.length) {
             overlay.style.display = "block";
             overlay.classList.remove('start');
             overlay.classList.add('win');
+            start_game.classList.add('win');
+            const congrats = document.createElement('h2');
+            congrats.textContent = "Congrats, You Won!"
+            overlay.appendChild(congrats);
         }
-        else if (missed === 4) {
+        else if (missed > 4) {
             overlay.style.display = "block";
             overlay.classList.remove('start');
             overlay.classList.add('lose');
+            start_game.classList.add('lose')
+            const sorry = document.createElement('h2');
+            sorry.textContent = "Sorry, you lost. Try again!"
+            overlay.appendChild(sorry);
         }
     }
-    checkWin();
-    console.log(missed);
 });
