@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const heart = document.getElementsByTagName("img");
     const letters = document.getElementsByClassName('letter');
     const keypad = document.querySelectorAll('button');
+    const ul = document.querySelector("ul");
 
-
-    let missed = 0; //if player guesses wrong five times, they lose
-    //starts the game by removing the overlay
+    let keyDis = [];
+    let missed = 0;
     start_game.addEventListener("click", () => {
         overlay.style.display = "none";
     });
-    //words that the player must guess
+
     const phrases = [
         'humble dumble',
         'salad dressing',
@@ -22,37 +22,33 @@ document.addEventListener('DOMContentLoaded', () => {
         'code camp',
         'nymph goddess',
     ]
-    //random number generator
+
     function random(max = 5) {
         return Math.floor(Math.random() * max);
     }
 
     function getRandomPhraseAsArray(arr) {
         let phrase = arr[random()];
-        phrase = phrase.split(' '); //becomes array of letters
-        for (let i = 0; i < phrase.length; i++) {
-            phrase[i] = phrase[i].split('');
-        }
+        phrase = phrase.split('');
         return phrase;
     }
     function addPhraseToDisplay(arr) {
         for (let i = 0; i < arr.length; i++) {
             const word = arr[i];
 
-
             for (let i = 0; i < word.length; i++) {
                 const li = document.createElement('li');
                 li.textContent = word[i];
-                phrase.appendChild(li);
 
+                ul.insertAdjacentElement("beforeend", li);
                 if (li.textContent !== " ") {
                     li.classList.add('letter');
                 }
-
+                else if (li.textContent === " ") {
+                    li.classList.add('space');
+                }
             }
-            const space = document.createElement('p');
-            space.textContent = '';
-            phrase.appendChild(space);
+
         }
 
     }
@@ -62,30 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkLetter(button) {
         let contains = 0;
         const words = letters.length;
-        console.log(contains);
-        // if (letters.indexOf(button) > -1) {
-        //     contains++;
-        //     console.log('worked');
-        // }
-        // for (i = 0; i < phraseArray.length; i++) {
-        //     console.log('started');
-        //     if (phraseArray[i].indexOf(button) > -1) {
-        //         contains++;
-        //         console.log('worked');
-        //     }
-        //     else if (phraseArray[i].indexOf(button) === -1) {
-        //         console.log('error');
-        //     }
-        // }
+        let letterClass;
 
         for (let i = 0; i < words; i++) {
             if (letters[i].textContent === button) {
-                console.log(letters[i].textContent);
                 letters[i].classList.add('show');
                 contains++;
-                //console.log(letters[i].indexOf(button));
-                //find letters that match the button pressed and then add show
-                //why does i work in time machine but not e?
+                letterClass = letters[i].classList.value;
             }
         }
         if (contains === 0) {
@@ -93,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
     }
-    qwerty.addEventListener('click', (e) => {//listen to qwerty
+    qwerty.addEventListener('click', (e) => {
         if (e.target.tagName === "BUTTON") {
             console.log(e.target.textContent);
             let button = e.target;
@@ -107,14 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             let letterFound = checkLetter(button.textContent);
             console.log(letterFound);
-            if (letterFound === null && missed !== 5) {
+            if (letterFound === null && missed !== 5 && keyDis.includes(e.target.textContent) === false) {
                 heart[missed].src = "images/lostHeart.png";
                 missed += 1;
-                console.log(missed);
+                keyDis.push(e.target.textContent);
             }
         }
         checkWin();
     })
+
     window.addEventListener('keypress', (e) => {
 
         for (let i = 0; i < keypad.length; i++) {
@@ -124,23 +104,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 keypad[i].disabled = true;
                 break;
             }
+
         }
         let letterFound = checkLetter(e.key);
-        console.log(letterFound);
-        if (letterFound === null && missed !== 5) {//and if the keypad is disabled.
+        if (letterFound === null && missed !== 5 && keyDis.includes(e.key) === false) {
             heart[missed].src = "images/lostHeart.png";
             missed += 1;
-            console.log(missed);
+            keyDis.push(e.key);
         }
-        //missed = missed + 1;
+
         checkWin();
     });
 
 
     function checkWin() {
         const show = document.getElementsByClassName('show');
-        console.log(show.length);
-        console.log(letters.length);
         if (show.length === letters.length) {
             overlay.style.display = "block";
             overlay.classList.remove('start');
